@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block nav_demo %}active{% endblock %}
+{% block title %}Iterativ PromptAI - Demo{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Iteratív Prompt Optimalizáció</h1>
+    <p>Nézd végig élőben, ahogy az AI lépésről lépésre javítja a promptot. Generálás, értékelés, finomítás — minden ciklus közelebb visz a tökéletes eredményhez.</p>
+</div>
+
+<!-- Preset Selection -->
+<div class="setup-panel">
+    <div class="presets-row" id="presetsRow">
+        <button class="preset-btn" data-preset="custom" onclick="selectPreset('custom')">Egyéni prompt</button>
+    </div>
+
+    <!-- Model Selection -->
+    <div class="setup-grid">
+        <div class="setup-group">
+            <label>Generátor modell</label>
+            <select id="generatorModel"></select>
+        </div>
+        <div class="setup-group">
+            <label>Értékelő modell</label>
+            <select id="evaluatorModel"></select>
+        </div>
+        <div class="setup-group">
+            <label>Finomító modell</label>
+            <select id="refinerModel"></select>
+        </div>
+    </div>
+
+    <!-- Prompt Input -->
+    <div class="prompt-input-area">
+        <textarea id="userPrompt" placeholder="Írd ide az induló promptot, vagy válassz egy presetet fentről..."></textarea>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="mode-toggle">
+            <button id="modeAuto" class="active" onclick="setMode('auto')">Auto</button>
+            <button id="modeManual" onclick="setMode('manual')">Lépésenkénti</button>
+        </div>
+        <div class="setup-group" style="flex-direction:row;align-items:center;gap:6px;">
+            <label style="min-width:auto;">Max iteráció:</label>
+            <input type="number" id="maxIterations" value="5" min="1" max="20" style="width:60px;">
+        </div>
+        <button class="btn btn-primary" id="btnStart" onclick="startSession()">
+            &#9654; Indítás
+        </button>
+        <button class="btn btn-warning hidden" id="btnPause" onclick="pauseSession()">
+            &#10074;&#10074; Szünet
+        </button>
+        <button class="btn btn-success hidden" id="btnResume" onclick="resumeSession()">
+            &#9654; Folytatás
+        </button>
+        <button class="btn btn-secondary hidden" id="btnStep" onclick="stepSession()">
+            &#9654;&#10074; Következő lépés
+        </button>
+        <button class="btn btn-danger hidden" id="btnStop" onclick="stopSession()">
+            &#9632; Leállítás
+        </button>
+    </div>
+</div>
+
+<!-- Session Info -->
+<div class="session-info hidden" id="sessionInfo">
+    <span>Session: <strong id="sessionId">-</strong></span>
+    <span>Iteráció: <strong id="iterCount">0</strong> / <strong id="iterMax">5</strong></span>
+    <span>Státusz: <strong id="sessionStatus">-</strong></span>
+</div>
+
+<!-- Domain Detection Panel -->
+<div class="domain-detection-panel hidden" id="domainPanel">
+    <div class="domain-card detecting" id="domainCard">
+        <div class="domain-icon" id="domainIcon">🔍</div>
+        <div class="domain-info">
+            <div class="detecting-pulse" id="domainDetecting">
+                <span class="spinner"></span>
+                <span>Szakterület azonosítása és értékelő szakértő kiválasztása...</span>
+            </div>
+            <div class="hidden" id="domainDetected">
+                <div class="expert-title" id="expertTitle"></div>
+                <div class="expert-desc" id="expertDesc"></div>
+                <div class="domain-criteria" id="domainCriteria"></div>
+                <details class="domain-prompt-toggle">
+                    <summary>▶ Generált értékelő prompt megtekintése</summary>
+                    <div class="domain-prompt-content" id="generatedEvalPrompt"></div>
+                </details>
+            </div>
+        </div>
+        <div class="domain-badge hidden" id="domainBadge"></div>
+    </div>
+</div>
+
+<!-- Score Chart -->
+<div class="chart-container hidden" id="chartContainer">
+    <div class="chart-title">Pontszám alakulása</div>
+    <canvas id="scoreChart" width="560" height="150"></canvas>
+</div>
+
+<!-- Iterations Canvas -->
+<div class="iterations-container" id="iterationsCanvas"></div>
+
+<!-- Summary Panel -->
+<div class="summary-panel hidden" id="summaryPanel">
+    <h3>✓ Session összefoglaló</h3>
+    <div class="summary-stats" id="summaryStats"></div>
+    <div class="controls">
+        <button class="btn btn-secondary" onclick="exportSession()">JSON Export</button>
+        <button class="btn btn-primary" onclick="resetDemo()">Új Demo</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/demo.js"></script>
+{% endblock %}
