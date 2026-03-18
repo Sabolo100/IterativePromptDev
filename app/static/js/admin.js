@@ -106,7 +106,11 @@ async function loadAdminSessions() {
                     </button>
                     <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;"
                             onclick="window.open('/api/sessions/${s.session_id}/export')">
-                        Export
+                        JSON
+                    </button>
+                    <button class="btn btn-success" style="padding:4px 10px;font-size:11px;"
+                            onclick="downloadDocx('${s.session_id}', this)">
+                        📄 Word
                     </button>
                     <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;"
                             onclick="deleteSession('${s.session_id}')">
@@ -193,4 +197,30 @@ async function deleteSession(id) {
     if (!confirm('Biztosan törölni akarod ezt a session-t?')) return;
     await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
     loadAdminSessions();
+}
+
+async function downloadDocx(sessionId, btn) {
+    const original = btn.innerHTML;
+    btn.innerHTML = '⏳';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/sessions/${sessionId}/export/docx`);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert('Hiba: ' + (err.error || 'ismeretlen'));
+            return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `session_${sessionId}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch(e) {
+        alert('Word export hiba: ' + e.message);
+    } finally {
+        btn.innerHTML = original;
+        btn.disabled = false;
+    }
 }

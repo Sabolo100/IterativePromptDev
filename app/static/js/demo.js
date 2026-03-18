@@ -596,3 +596,32 @@ function showSummary(data) {
     panel.classList.remove('hidden');
     panel.scrollIntoView({ behavior: 'smooth' });
 }
+
+// === WORD EXPORT ===
+async function exportSessionDocx() {
+    if (!currentSessionId) return;
+    const btn = document.getElementById('btnDocxExport');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Generálás...';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/sessions/${currentSessionId}/export/docx`);
+        if (!res.ok) {
+            const err = await res.json();
+            alert('Hiba: ' + (err.error || 'ismeretlen hiba'));
+            return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `session_${currentSessionId}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch(e) {
+        alert('Word export hiba: ' + e.message);
+    } finally {
+        btn.innerHTML = original;
+        btn.disabled = false;
+    }
+}

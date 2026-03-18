@@ -7,7 +7,7 @@ PORT = 5000
 AVAILABLE_MODELS = {
     "openai": {
         "name": "OpenAI",
-        "models": ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o"],
+        "models": ["gpt-5.4-mini","gpt-5.4","gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o"],
         "env_key": "OPENAI_API_KEY",
     },
     "anthropic": {

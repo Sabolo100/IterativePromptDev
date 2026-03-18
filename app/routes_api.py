@@ -182,3 +182,24 @@ def get_session_evaluator_prompt(session_id):
         "generated_evaluator_prompt": session.get("generated_evaluator_prompt"),
         "domain_detector_ms": session.get("domain_detector_ms", 0),
     })
+
+
+@api_bp.route("/sessions/<session_id>/export/docx", methods=["GET"])
+def export_session_docx(session_id):
+    """Generate and return a Word (.docx) session report."""
+    from flask import Response
+    session = repo.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+    iterations = repo.get_iterations(session_id)
+    try:
+        from engine.export_docx import generate_session_docx
+        docx_bytes = generate_session_docx(dict(session), iterations)
+    except Exception as e:
+        return jsonify({"error": f"DOCX generation failed: {e}"}), 500
+
+    return Response(
+        docx_bytes,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename=session_{session_id}.docx"}
+    )

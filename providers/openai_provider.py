@@ -12,8 +12,21 @@ class OpenAIProvider(BaseProvider):
             self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         return self.client
 
+    # Models that use max_completion_tokens instead of max_tokens
+    _NEW_TOKEN_PARAM_PREFIXES = ("o1", "o3", "o4", "gpt-5",)
+
+    def _uses_new_token_param(self, model: str) -> bool:
+        m = model.lower()
+        return any(m.startswith(p) for p in self._NEW_TOKEN_PARAM_PREFIXES)
+
     def complete(self, system_prompt, user_prompt, model):
         client = self._get_client()
+        extra = {}
+        if self._uses_new_token_param(model):
+            extra["max_completion_tokens"] = 4096
+        else:
+            extra["max_tokens"] = 4096
+
         response = client.chat.completions.create(
             model=model,
             messages=[
@@ -21,6 +34,6 @@ class OpenAIProvider(BaseProvider):
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.7,
-            max_tokens=4096,
+            **extra,
         )
         return response.choices[0].message.content
